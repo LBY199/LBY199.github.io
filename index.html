@@ -1,12 +1,1189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scottnow0</title>
+    <title>每周学习任务记录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #6a11cb;
+            --secondary: #2575fc;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .weeks-list {
+            list-style: none;
+        }
+
+        .week-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .week-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .week-item.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid var(--warning);
+        }
+
+        .week-item .week-number {
+            font-weight: bold;
+            margin-right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .week-item .week-date {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .week-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .week-item:hover .week-actions {
+            opacity: 1;
+        }
+
+        .week-action-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 4px;
+            border-radius: 3px;
+            transition: background 0.2s;
+        }
+
+        .week-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .add-week-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            margin: 15px 20px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: calc(100% - 40px);
+            transition: all 0.3s ease;
+        }
+
+        .add-week-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 主内容区样式 */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+        }
+
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .week-title {
+            font-size: 1.8rem;
+            color: var(--dark);
+        }
+
+        .week-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray);
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filter-box select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        .tasks-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .task-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .task-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-right: 10px;
+        }
+
+        .task-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-in-progress {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .task-description {
+            color: var(--gray);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .task-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .task-date {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-edit {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .add-task-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            gap: 8px;
+        }
+
+        .add-task-btn:hover {
+            background: var(--secondary);
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.2);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: var(--gray);
+            color: white;
+        }
+
+        .btn-save {
+            background: var(--success);
+            color: white;
+        }
+
+        /* 确认对话框样式 */
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-content {
+            background: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .confirm-header {
+            padding: 15px 20px;
+            background: var(--danger);
+            color: white;
+        }
+
+        .confirm-body {
+            padding: 20px;
+        }
+
+        .confirm-footer {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-no {
+            background: var(--gray);
+            color: white;
+        }
+
+        .btn-yes {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+                padding: 20px;
+            }
+            
+            .tasks-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .week-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .week-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .search-filter {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>你好</h1>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div>
+                <h1>学习计划</h1>
+                <p>记录每周学习任务</p>
+            </div>
+        </div>
+        <ul class="weeks-list" id="weeksList">
+            <!-- 周数目录将通过JavaScript动态生成 -->
+        </ul>
+        <button class="add-week-btn" id="addWeekBtn">
+            <i class="fas fa-plus"></i> 添加新周
+        </button>
+    </div>
+
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <div class="week-header">
+            <h2 class="week-title" id="currentWeekTitle">第1周学习任务</h2>
+            <div class="week-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalTasks">0</div>
+                    <div class="stat-label">总任务</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="completedTasks">0</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="progress">0%</div>
+                    <div class="stat-label">进度</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="搜索任务...">
+            </div>
+            <div class="filter-box">
+                <select id="statusFilter">
+                    <option value="all">所有状态</option>
+                    <option value="pending">未开始</option>
+                    <option value="in-progress">进行中</option>
+                    <option value="completed">已完成</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tasks-container" id="tasksContainer">
+            <!-- 任务卡片将通过JavaScript动态生成 -->
+        </div>
+
+        <button class="add-task-btn" id="addTaskBtn">
+            <i class="fas fa-plus"></i> 添加新任务
+        </button>
+    </div>
+
+    <!-- 任务编辑模态框 -->
+    <div class="modal" id="taskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加新任务</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">任务标题</label>
+                        <input type="text" id="taskTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">任务描述</label>
+                        <textarea id="taskDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskStatus">任务状态</label>
+                        <select id="taskStatus" class="form-control">
+                            <option value="pending">未开始</option>
+                            <option value="in-progress">进行中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDate">日期</label>
+                        <input type="date" id="taskDate" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelTask">取消</button>
+                <button class="btn btn-save" id="saveTask">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 周编辑模态框 -->
+    <div class="modal" id="weekModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="weekModalTitle">编辑周信息</h3>
+                <button class="close-btn" id="closeWeekModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="weekForm">
+                    <div class="form-group">
+                        <label for="weekTitle">周标题</label>
+                        <input type="text" id="weekTitle" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weekDate">日期范围</label>
+                        <input type="text" id="weekDate" class="form-control" placeholder="例如：2023-10-02 至 2023-10-08" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-cancel" id="cancelWeek">取消</button>
+                <button class="btn btn-save" id="saveWeek">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div class="confirm-dialog" id="confirmDialog">
+        <div class="confirm-content">
+            <div class="confirm-header">
+                <h3>确认删除</h3>
+            </div>
+            <div class="confirm-body">
+                <p id="confirmMessage">确定要删除这个任务吗？此操作无法撤销。</p>
+            </div>
+            <div class="confirm-footer">
+                <button class="btn btn-no" id="cancelDelete">取消</button>
+                <button class="btn btn-yes" id="confirmDelete">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化数据
+        let weeksData = JSON.parse(localStorage.getItem('weeksData')) || [
+            {
+                id: 1,
+                title: "第1周",
+                date: "2023-10-02 至 2023-10-08",
+                tasks: [
+                    {
+                        id: 1,
+                        title: "HTML/CSS基础学习",
+                        description: "学习HTML标签和CSS基础样式，完成一个静态页面",
+                        status: "completed",
+                        date: "2023-10-03"
+                    },
+                    {
+                        id: 2,
+                        title: "JavaScript入门",
+                        description: "学习JavaScript基础语法和DOM操作",
+                        status: "in-progress",
+                        date: "2023-10-05"
+                    },
+                    {
+                        id: 3,
+                        title: "响应式设计",
+                        description: "学习媒体查询和响应式布局技巧",
+                        status: "pending",
+                        date: "2023-10-07"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "第2周",
+                date: "2023-10-09 至 2023-10-15",
+                tasks: [
+                    {
+                        id: 1,
+                        title: "JavaScript进阶",
+                        description: "学习函数、对象和事件处理",
+                        status: "pending",
+                        date: "2023-10-10"
+                    },
+                    {
+                        id: 2,
+                        title: "ES6新特性",
+                        description: "学习let/const、箭头函数、模板字符串等",
+                        status: "pending",
+                        date: "2023-10-12"
+                    }
+                ]
+            }
+        ];
+
+        // 当前选中的周ID
+        let currentWeekId = 1;
+        
+        // 当前编辑的任务ID（null表示新建任务）
+        let currentEditTaskId = null;
+        
+        // 当前编辑的周ID（null表示新建周）
+        let currentEditWeekId = null;
+
+        // DOM元素
+        const weeksList = document.getElementById('weeksList');
+        const tasksContainer = document.getElementById('tasksContainer');
+        const currentWeekTitle = document.getElementById('currentWeekTitle');
+        const totalTasks = document.getElementById('totalTasks');
+        const completedTasks = document.getElementById('completedTasks');
+        const progress = document.getElementById('progress');
+        const addWeekBtn = document.getElementById('addWeekBtn');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        
+        // 模态框元素
+        const taskModal = document.getElementById('taskModal');
+        const weekModal = document.getElementById('weekModal');
+        const confirmDialog = document.getElementById('confirmDialog');
+        const taskForm = document.getElementById('taskForm');
+        const weekForm = document.getElementById('weekForm');
+        const modalTitle = document.getElementById('modalTitle');
+        const weekModalTitle = document.getElementById('weekModalTitle');
+        const confirmMessage = document.getElementById('confirmMessage');
+        
+        // 初始化应用
+        function initApp() {
+            renderWeeksList();
+            renderTasks();
+            updateStats();
+            
+            // 设置事件监听器
+            addWeekBtn.addEventListener('click', () => openWeekModal());
+            addTaskBtn.addEventListener('click', () => openTaskModal());
+            
+            // 模态框事件
+            document.getElementById('closeModal').addEventListener('click', closeTaskModal);
+            document.getElementById('cancelTask').addEventListener('click', closeTaskModal);
+            document.getElementById('saveTask').addEventListener('click', saveTask);
+            
+            document.getElementById('closeWeekModal').addEventListener('click', closeWeekModal);
+            document.getElementById('cancelWeek').addEventListener('click', closeWeekModal);
+            document.getElementById('saveWeek').addEventListener('click', saveWeek);
+            
+            document.getElementById('cancelDelete').addEventListener('click', closeConfirmDialog);
+            document.getElementById('confirmDelete').addEventListener('click', confirmDelete);
+            
+            // 搜索和过滤事件
+            searchInput.addEventListener('input', renderTasks);
+            statusFilter.addEventListener('change', renderTasks);
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', (e) => {
+                if (e.target === taskModal) closeTaskModal();
+                if (e.target === weekModal) closeWeekModal();
+                if (e.target === confirmDialog) closeConfirmDialog();
+            });
+            
+            // 保存数据到localStorage
+            saveData();
+        }
+
+        // 渲染周数列表
+        function renderWeeksList() {
+            weeksList.innerHTML = '';
+            
+            weeksData.forEach(week => {
+                const weekItem = document.createElement('li');
+                weekItem.className = `week-item ${week.id === currentWeekId ? 'active' : ''}`;
+                weekItem.innerHTML = `
+                    <div class="week-number">${week.id}</div>
+                    <div>
+                        <div>${week.title}</div>
+                        <div class="week-date">${week.date}</div>
+                    </div>
+                    <div class="week-actions">
+                        <button class="week-action-btn edit-week" data-week-id="${week.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="week-action-btn delete-week" data-week-id="${week.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                
+                weekItem.addEventListener('click', (e) => {
+                    if (!e.target.closest('.week-actions')) {
+                        currentWeekId = week.id;
+                        renderWeeksList();
+                        renderTasks();
+                        updateStats();
+                    }
+                });
+                
+                weeksList.appendChild(weekItem);
+            });
+            
+            // 添加周编辑和删除事件
+            document.querySelectorAll('.edit-week').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const weekId = parseInt(e.currentTarget.dataset.weekId);
+                    openWeekModal(weekId);
+                });
+            });
+            
+            document.querySelectorAll('.delete-week').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const weekId = parseInt(e.currentTarget.dataset.weekId);
+                    openConfirmDialog('week', weekId);
+                });
+            });
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            const currentWeek = weeksData.find(week => week.id === currentWeekId);
+            if (!currentWeek) return;
+            
+            currentWeekTitle.textContent = currentWeek.title + '学习任务';
+            tasksContainer.innerHTML = '';
+            
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusFilterValue = statusFilter.value;
+            
+            let filteredTasks = currentWeek.tasks.filter(task => {
+                const matchesSearch = task.title.toLowerCase().includes(searchTerm) || 
+                                     task.description.toLowerCase().includes(searchTerm);
+                const matchesStatus = statusFilterValue === 'all' || task.status === statusFilterValue;
+                return matchesSearch && matchesStatus;
+            });
+            
+            if (filteredTasks.length === 0) {
+                tasksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tasks"></i>
+                        <h3>暂无任务</h3>
+                        <p>${searchTerm || statusFilterValue !== 'all' ? '没有找到匹配的任务' : '点击"添加新任务"开始创建'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredTasks.forEach(task => {
+                const taskCard = document.createElement('div');
+                taskCard.className = 'task-card';
+                taskCard.innerHTML = `
+                    <div class="task-header">
+                        <div class="task-title">${task.title}</div>
+                        <div class="task-status status-${task.status}">
+                            ${getStatusText(task.status)}
+                        </div>
+                    </div>
+                    <div class="task-description">${task.description}</div>
+                    <div class="task-footer">
+                        <div class="task-date">${task.date}</div>
+                        <div class="task-actions">
+                            <button class="btn btn-edit" data-task-id="${task.id}">
+                                <i class="fas fa-edit"></i> 编辑
+                            </button>
+                            <button class="btn btn-delete" data-task-id="${task.id}">
+                                <i class="fas fa-trash"></i> 删除
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                tasksContainer.appendChild(taskCard);
+            });
+            
+            // 添加任务按钮事件监听器
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const taskId = parseInt(e.currentTarget.dataset.taskId);
+                    openTaskModal(taskId);
+                });
+            });
+            
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const taskId = parseInt(e.currentTarget.dataset.taskId);
+                    openConfirmDialog('task', taskId);
+                });
+            });
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const currentWeek = weeksData.find(week => week.id === currentWeekId);
+            if (!currentWeek) return;
+            
+            const total = currentWeek.tasks.length;
+            const completed = currentWeek.tasks.filter(task => task.status === 'completed').length;
+            const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            totalTasks.textContent = total;
+            completedTasks.textContent = completed;
+            progress.textContent = `${progressPercent}%`;
+        }
+
+        // 获取状态文本
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': '未开始',
+                'in-progress': '进行中',
+                'completed': '已完成'
+            };
+            return statusMap[status] || '未知';
+        }
+
+        // 打开任务模态框
+        function openTaskModal(taskId = null) {
+            currentEditTaskId = taskId;
+            const currentWeek = weeksData.find(week => week.id === currentWeekId);
+            
+            if (taskId) {
+                // 编辑现有任务
+                modalTitle.textContent = '编辑任务';
+                const task = currentWeek.tasks.find(t => t.id === taskId);
+                document.getElementById('taskTitle').value = task.title;
+                document.getElementById('taskDescription').value = task.description;
+                document.getElementById('taskStatus').value = task.status;
+                document.getElementById('taskDate').value = task.date;
+            } else {
+                // 创建新任务
+                modalTitle.textContent = '添加新任务';
+                document.getElementById('taskTitle').value = '';
+                document.getElementById('taskDescription').value = '';
+                document.getElementById('taskStatus').value = 'pending';
+                document.getElementById('taskDate').value = new Date().toISOString().split('T')[0];
+            }
+            
+            taskModal.style.display = 'flex';
+        }
+
+        // 关闭任务模态框
+        function closeTaskModal() {
+            taskModal.style.display = 'none';
+            taskForm.reset();
+        }
+
+        // 保存任务
+        function saveTask() {
+            const currentWeek = weeksData.find(week => week.id === currentWeekId);
+            if (!currentWeek) return;
+            
+            const title = document.getElementById('taskTitle').value.trim();
+            const description = document.getElementById('taskDescription').value.trim();
+            const status = document.getElementById('taskStatus').value;
+            const date = document.getElementById('taskDate').value;
+            
+            if (!title) {
+                alert('请输入任务标题');
+                return;
+            }
+            
+            if (currentEditTaskId) {
+                // 更新现有任务
+                const task = currentWeek.tasks.find(t => t.id === currentEditTaskId);
+                task.title = title;
+                task.description = description;
+                task.status = status;
+                task.date = date;
+            } else {
+                // 创建新任务
+                const newTaskId = currentWeek.tasks.length > 0 ? 
+                    Math.max(...currentWeek.tasks.map(t => t.id)) + 1 : 1;
+                
+                currentWeek.tasks.push({
+                    id: newTaskId,
+                    title,
+                    description,
+                    status,
+                    date
+                });
+            }
+            
+            renderTasks();
+            updateStats();
+            closeTaskModal();
+            saveData();
+        }
+
+        // 打开周模态框
+        function openWeekModal(weekId = null) {
+            currentEditWeekId = weekId;
+            
+            if (weekId) {
+                // 编辑现有周
+                weekModalTitle.textContent = '编辑周信息';
+                const week = weeksData.find(w => w.id === weekId);
+                document.getElementById('weekTitle').value = week.title;
+                document.getElementById('weekDate').value = week.date;
+            } else {
+                // 创建新周
+                weekModalTitle.textContent = '添加新周';
+                document.getElementById('weekTitle').value = '';
+                document.getElementById('weekDate').value = '';
+            }
+            
+            weekModal.style.display = 'flex';
+        }
+
+        // 关闭周模态框
+        function closeWeekModal() {
+            weekModal.style.display = 'none';
+            weekForm.reset();
+        }
+
+        // 保存周
+        function saveWeek() {
+            const title = document.getElementById('weekTitle').value.trim();
+            const date = document.getElementById('weekDate').value.trim();
+            
+            if (!title || !date) {
+                alert('请填写完整的周信息');
+                return;
+            }
+            
+            if (currentEditWeekId) {
+                // 更新现有周
+                const week = weeksData.find(w => w.id === currentEditWeekId);
+                week.title = title;
+                week.date = date;
+            } else {
+                // 创建新周
+                const newWeekId = weeksData.length > 0 ? Math.max(...weeksData.map(w => w.id)) + 1 : 1;
+                
+                weeksData.push({
+                    id: newWeekId,
+                    title,
+                    date,
+                    tasks: []
+                });
+                
+                currentWeekId = newWeekId;
+            }
+            
+            renderWeeksList();
+            renderTasks();
+            updateStats();
+            closeWeekModal();
+            saveData();
+        }
+
+        // 打开确认对话框
+        function openConfirmDialog(type, id) {
+            if (type === 'task') {
+                const currentWeek = weeksData.find(week => week.id === currentWeekId);
+                const task = currentWeek.tasks.find(t => t.id === id);
+                confirmMessage.textContent = `确定要删除任务"${task.title}"吗？此操作无法撤销。`;
+            } else {
+                const week = weeksData.find(w => w.id === id);
+                confirmMessage.textContent = `确定要删除"${week.title}"吗？此操作将删除该周的所有任务，且无法撤销。`;
+            }
+            
+            confirmDialog.dataset.type = type;
+            confirmDialog.dataset.id = id;
+            confirmDialog.style.display = 'flex';
+        }
+
+        // 关闭确认对话框
+        function closeConfirmDialog() {
+            confirmDialog.style.display = 'none';
+        }
+
+        // 确认删除
+        function confirmDelete() {
+            const type = confirmDialog.dataset.type;
+            const id = parseInt(confirmDialog.dataset.id);
+            
+            if (type === 'task') {
+                const currentWeek = weeksData.find(week => week.id === currentWeekId);
+                currentWeek.tasks = currentWeek.tasks.filter(t => t.id !== id);
+                renderTasks();
+                updateStats();
+            } else {
+                if (weeksData.length <= 1) {
+                    alert('至少需要保留一个周');
+                    closeConfirmDialog();
+                    return;
+                }
+                
+                weeksData = weeksData.filter(w => w.id !== id);
+                
+                // 如果删除的是当前周，切换到第一个周
+                if (currentWeekId === id) {
+                    currentWeekId = weeksData[0].id;
+                }
+                
+                renderWeeksList();
+                renderTasks();
+                updateStats();
+            }
+            
+            closeConfirmDialog();
+            saveData();
+        }
+
+        // 保存数据到localStorage
+        function saveData() {
+            localStorage.setItem('weeksData', JSON.stringify(weeksData));
+        }
+
+        // 初始化应用
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
