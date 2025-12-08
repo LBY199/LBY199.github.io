@@ -209,6 +209,45 @@
             color: var(--text-color);
         }
 
+        /* 笔记部分样式 */
+        .notes-section {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .notes-section h3 {
+            color: var(--title-color);
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .notes-list {
+            list-style-type: none;
+        }
+
+        .notes-list li {
+            margin-bottom: 8px;
+        }
+
+        .notes-list a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+            transition: color 0.2s;
+        }
+
+        .notes-list a:hover {
+            color: var(--primary-color);
+        }
+
+        .notes-list i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -230,6 +269,11 @@
                 margin-top: 15px;
                 margin-left: 20px;
             }
+
+            .notes-section {
+                padding: 15px;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -243,6 +287,16 @@
         <ul class="weeks-list" id="weeksList">
             <!-- 周次列表将通过JavaScript动态生成 -->
         </ul>
+        
+        <!-- 新增：笔记部分 -->
+        <div class="notes-section">
+            <h3>笔记文档</h3>
+            <ul class="notes-list">
+                <li><a href="傅里叶变换推导.pdf" target="_blank"><i class="fas fa-file-pdf"></i> 傅里叶变换推导</a></li>
+                <li><a href="文献阅读笔记(1).pdf" target="_blank"><i class="fas fa-file-pdf"></i> 文献阅读笔记(1)</a></li>
+            </ul>
+        </div>
+
         <button class="theme-toggle" id="themeToggle">
             <i class="fas fa-moon"></i> 切换主题
         </button>
@@ -280,9 +334,7 @@
                 } catch (error) {
                     console.error('加载数据失败:', error);
                     // 回退到默认数据
-                    return [
-                        // 默认数据...
-                    ];
+                    return [];
                 }
             }
 
