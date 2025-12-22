@@ -287,13 +287,15 @@
         <ul class="weeks-list" id="weeksList">
             <!-- 周次列表将通过JavaScript动态生成 -->
         </ul>
-        
+
         <!-- 新增：笔记部分 -->
+        <!-- 修改notes-section部分 -->
         <div class="notes-section">
             <h3>笔记文档</h3>
             <ul class="notes-list">
+                <li><a href="notes.html"><i class="fas fa-book"></i> 查看所有笔记</a></li>
                 <li><a href="傅里叶变换推导.pdf" target="_blank"><i class="fas fa-file-pdf"></i> 傅里叶变换推导</a></li>
-                <li><a href="文献阅读笔记(1).pdf" target="_blank"><i class="fas fa-file-pdf"></i> 文献阅读笔记(1)</a></li>
+                <li><a href="傅里叶光谱仪高精度光谱定标研究_公式推导.pdf" target="_blank"><i class="fas fa-file-pdf"></i> 傅里叶光谱仪高精度光谱定标研究_公式推导</a></li>
             </ul>
         </div>
 
@@ -308,7 +310,7 @@
         </div>
 
         <footer>
-            <p>© 2023 个人学习记录 | 持续更新中...</p>
+            <p>© 2025 个人学习记录 | 持续更新中...</p>
         </footer>
     </div>
 
@@ -344,9 +346,6 @@
                 renderWeeksList(weeksData);
                 renderWeekCards(weeksData);
             }
-
-            // 启动应用
-            initApp();
 
             // 渲染周次列表
             function renderWeeksList(weeksData) {
