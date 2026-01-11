@@ -1,238 +1,431 @@
+[file name]: index.html
+[file content begin]
 <!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每周学习任务记录</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 引入Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-    <link rel="stylesheet" href="style.css">
+    <title>个人学习记录</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6b8cbc;
+            --secondary-color: #8aa8d8;
+            --accent-color: #7d9cc5;
+            --bg-color: #f8f9fa;
+            --sidebar-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-color: #555555;
+            --title-color: #444444;
+            --border-color: #e1e4e8;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-mode {
+            --primary-color: #7d9cc5;
+            --secondary-color: #8aa8d8;
+            --accent-color: #6b8cbc;
+            --bg-color: #1a1a2e;
+            --sidebar-bg: #16213e;
+            --card-bg: #16213e;
+            --text-color: #cccccc;
+            --title-color: #dddddd;
+            --border-color: #2d3748;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            overflow-y: auto;
+            position: fixed;
+            height: 100vh;
+            box-shadow: var(--shadow);
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--title-color);
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .weeks-list {
+            list-style-type: none;
+        }
+
+        .week-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            color: var(--text-color);
+            transition: background-color 0.2s;
+        }
+
+        .week-item:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .week-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .week-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .week-header {
+            padding: 15px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .week-title {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .week-date {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .week-toggle {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .week-content {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, padding 0.3s ease;
+        }
+
+        .week-content.expanded {
+            padding: 20px;
+            max-height: 1000px;
+        }
+
+        .week-content ul {
+            list-style-type: none;
+            margin-left: 10px;
+        }
+
+        .week-content li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .week-content li:before {
+            content: "•";
+            color: var(--accent-color);
+            position: absolute;
+            left: 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-color);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--border-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-color);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                max-height: 200px;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .theme-toggle {
+                position: static;
+                margin-top: 15px;
+                margin-left: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- 登录页面 -->
-    <div class="login-container" id="loginContainer">
-        <div class="login-box">
-            <h1>学习计划</h1>
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label for="email">邮箱</label>
-                    <input type="email" id="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">密码</label>
-                    <input type="password" id="password" required>
-                </div>
-                <button type="submit" class="login-btn" id="loginBtn">登录</button>
-            </form>
-            <div class="auth-toggle" id="toggleRegister">没有账户？点击注册</div>
+    <div class="sidebar">
+        <div class="logo">
+            <h1>学习记录</h1>
+            <p class="subtitle">按周记录学习内容</p>
         </div>
+        <ul class="weeks-list" id="weeksList">
+            <!-- 周次列表将通过JavaScript动态生成 -->
+        </ul>
+
+        <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i> 切换主题
+        </button>
     </div>
 
-    <!-- 注册页面 -->
-    <div class="login-container" id="registerContainer" style="display: none;">
-        <div class="login-box">
-            <h1>注册账户</h1>
-            <form class="login-form" id="registerForm">
-                <div class="form-group">
-                    <label for="regName">姓名</label>
-                    <input type="text" id="regName" required>
-                </div>
-                <div class="form-group">
-                    <label for="regEmail">邮箱</label>
-                    <input type="email" id="regEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPassword">密码</label>
-                    <input type="password" id="regPassword" required>
-                </div>
-                <button type="submit" class="login-btn" id="registerBtn">注册</button>
-            </form>
-            <div class="auth-toggle" id="toggleLogin">已有账户？点击登录</div>
-        </div>
-    </div>
-
-    <!-- 应用主界面 -->
-    <div class="app-container" id="appContainer">
-        <!-- 用户信息栏 -->
-        <div class="user-info">
-            <div class="user-details">
-                <div class="user-avatar" id="userAvatar">U</div>
-                <div>
-                    <div id="userName">用户</div>
-                    <div id="userEmail" style="font-size: 0.8rem; color: var(--gray);">user@example.com</div>
-                </div>
-            </div>
-            <button class="logout-btn" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i> 退出登录
-            </button>
+    <div class="main-content">
+        <div id="weeksContainer">
+            <!-- 周次卡片将通过JavaScript动态生成 -->
         </div>
 
-        <!-- 侧边栏 -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div>
-                    <h1>学习计划</h1>
-                    <p>记录每周学习任务</p>
-                </div>
-            </div>
-            <ul class="weeks-list" id="weeksList">
-                <!-- 周数目录将通过JavaScript动态生成 -->
-            </ul>
-            <button class="add-week-btn" id="addWeekBtn">
-                <i class="fas fa-plus"></i> 添加新周
-            </button>
-        </div>
-
-        <!-- 主内容区 -->
-        <div class="main-content">
-            <div class="week-header">
-                <h2 class="week-title" id="currentWeekTitle">第1周学习任务</h2>
-                <div class="week-stats">
-                    <div class="stat-box">
-                        <div class="stat-value" id="totalTasks">0</div>
-                        <div class="stat-label">总任务</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="completedTasks">0</div>
-                        <div class="stat-label">已完成</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="progress">0%</div>
-                        <div class="stat-label">进度</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="search-filter">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" placeholder="搜索任务...">
-                </div>
-                <div class="filter-box">
-                    <select id="statusFilter">
-                        <option value="all">所有状态</option>
-                        <option value="pending">未开始</option>
-                        <option value="in-progress">进行中</option>
-                        <option value="completed">已完成</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="tasks-container" id="tasksContainer">
-                <!-- 任务卡片将通过JavaScript动态生成 -->
-            </div>
-
-            <button class="add-task-btn" id="addTaskBtn">
-                <i class="fas fa-plus"></i> 添加新任务
-            </button>
-        </div>
-    </div>
-
-    <!-- 任务编辑模态框 -->
-    <div class="modal" id="taskModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">添加新任务</h3>
-                <button class="close-btn" id="closeModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="taskForm">
-                    <div class="form-group">
-                        <label for="taskTitle">任务标题</label>
-                        <input type="text" id="taskTitle" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDescription">任务描述</label>
-                        <textarea id="taskDescription" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskStatus">任务状态</label>
-                        <select id="taskStatus" class="form-control">
-                            <option value="pending">未开始</option>
-                            <option value="in-progress">进行中</option>
-                            <option value="completed">已完成</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDate">日期</label>
-                        <input type="date" id="taskDate" class="form-control" required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-cancel" id="cancelTask">取消</button>
-                <button class="btn btn-save" id="saveTask">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 周编辑模态框 -->
-    <div class="modal" id="weekModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="weekModalTitle">编辑周信息</h3>
-                <button class="close-btn" id="closeWeekModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="weekForm">
-                    <div class="form-group">
-                        <label for="weekTitle">周标题</label>
-                        <input type="text" id="weekTitle" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weekDate">日期范围</label>
-                        <input type="text" id="weekDate" class="form-control" placeholder="例如：2023-10-02 至 2023-10-08"
-                            required>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-cancel" id="cancelWeek">取消</button>
-                <button class="btn btn-save" id="saveWeek">保存</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 删除确认对话框 -->
-    <div class="confirm-dialog" id="confirmDialog">
-        <div class="confirm-content">
-            <div class="confirm-header">
-                <h3>确认删除</h3>
-            </div>
-            <div class="confirm-body">
-                <p id="confirmMessage">确定要删除这个任务吗？此操作无法撤销。</p>
-            </div>
-            <div class="confirm-footer">
-                <button class="btn btn-no" id="cancelDelete">取消</button>
-                <button class="btn btn-yes" id="confirmDelete">删除</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 加载指示器 -->
-    <div class="loader" id="loader">
-        <div class="spinner"></div>
-        <div>同步数据中...</div>
+        <footer>
+            <p>© 2025 个人学习记录 | 持续更新中...</p>
+        </footer>
     </div>
 
     <script>
-        // Firebase配置 - 需要替换为你的实际配置
-        const firebaseConfig = {
-            apiKey: "AIzaSyCY_5EyIwQ-YG0uyzWJMqknLnt0TmTRjT8",
-            authDomain: "lby199-37798.firebaseapp.com",
-            projectId: "lby199-37798",
-            storageBucket: "lby199-37798.firebasestorage.app",
-            messagingSenderId: "960002392251",
-            appId: "1:960002392251:web:b5003304517f8d460f699e",
-            measurementId: "G-2E7WQ101P8"
-        };
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            const weeksList = document.getElementById('weeksList');
+            const weeksContainer = document.getElementById('weeksContainer');
+            const themeToggle = document.getElementById('themeToggle');
+
+            // 从JSON文件加载数据
+            async function loadWeeksData() {
+                try {
+                    // 使用fetch API获取JSON文件
+                    const response = await fetch('weeks.json');
+
+                    if (!response.ok) {
+                        throw new Error('无法加载学习记录文件');
+                    }
+
+                    const weeksData = await response.json();
+                    return weeksData;
+                } catch (error) {
+                    console.error('加载数据失败:', error);
+                    // 回退到默认数据
+                    return [];
+                }
+            }
+
+            // 初始化应用
+            async function initApp() {
+                const weeksData = await loadWeeksData();
+                renderWeeksList(weeksData);
+                renderWeekCards(weeksData);
+            }
+
+            // 渲染周次列表
+            function renderWeeksList(weeksData) {
+                weeksList.innerHTML = '';
+
+                weeksData.forEach(week => {
+                    const weekItem = document.createElement('li');
+                    weekItem.className = 'week-item';
+                    weekItem.textContent = week.title;
+                    weekItem.dataset.weekId = week.id;
+
+                    weekItem.addEventListener('click', function () {
+                        // 移除所有active类
+                        document.querySelectorAll('.week-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+
+                        // 添加active类到当前项
+                        this.classList.add('active');
+
+                        // 滚动到对应的周次卡片
+                        const weekCard = document.querySelector(`.week-card[data-week-id="${week.id}"]`);
+                        if (weekCard) {
+                            weekCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                            // 如果周次内容未展开，则展开它
+                            const content = weekCard.querySelector('.week-content');
+                            const toggleBtn = weekCard.querySelector('.week-toggle');
+                            if (!content.classList.contains('expanded')) {
+                                content.classList.add('expanded');
+                                const icon = toggleBtn.querySelector('i');
+                                icon.className = 'fas fa-chevron-up';
+                            }
+                        }
+                    });
+
+                    weeksList.appendChild(weekItem);
+                });
+
+                // 默认激活第一项
+                if (weeksList.firstChild) {
+                    weeksList.firstChild.classList.add('active');
+                }
+            }
+
+            // 渲染周次卡片
+            function renderWeekCards(weeksData) {
+                weeksContainer.innerHTML = '';
+
+                if (weeksData.length === 0) {
+                    weeksContainer.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>暂无学习记录</h3>
+                            <p>请添加学习内容</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                weeksData.forEach(week => {
+                    const weekCard = document.createElement('div');
+                    weekCard.className = 'week-card';
+                    weekCard.dataset.weekId = week.id;
+                    weekCard.innerHTML = `
+                        <div class="week-header">
+                            <div>
+                                <div class="week-title">${week.title}</div>
+                                <div class="week-date">${week.date}</div>
+                            </div>
+                            <button class="week-toggle"><i class="fas fa-chevron-down"></i></button>
+                        </div>
+                        <div class="week-content">
+                            <h4>学习内容:</h4>
+                            <ul>
+                                ${week.content.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    weeksContainer.appendChild(weekCard);
+
+                    // 添加展开/收起功能
+                    const toggleBtn = weekCard.querySelector('.week-toggle');
+                    const content = weekCard.querySelector('.week-content');
+
+                    toggleBtn.addEventListener('click', function () {
+                        content.classList.toggle('expanded');
+                        const icon = toggleBtn.querySelector('i');
+                        if (content.classList.contains('expanded')) {
+                            icon.className = 'fas fa-chevron-up';
+                        } else {
+                            icon.className = 'fas fa-chevron-down';
+                        }
+                    });
+                });
+
+                // 默认展开第一周内容
+                setTimeout(() => {
+                    const firstCard = document.querySelector('.week-card');
+                    if (firstCard) {
+                        const toggleBtn = firstCard.querySelector('.week-toggle');
+                        const content = firstCard.querySelector('.week-content');
+                        content.classList.add('expanded');
+                        const icon = toggleBtn.querySelector('i');
+                        icon.className = 'fas fa-chevron-up';
+                    }
+                }, 300);
+            }
+
+            // 初始化应用
+            async function initApp() {
+                const weeksData = await loadWeeksData();
+                renderWeeksList(weeksData);
+                renderWeekCards(weeksData);
+            }
+
+            // 主题切换
+            themeToggle.addEventListener('click', function () {
+                document.body.classList.toggle('dark-mode');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark-mode')) {
+                    icon.className = 'fas fa-sun';
+                    this.innerHTML = '<i class="fas fa-sun"></i> 切换主题';
+                } else {
+                    icon.className = 'fas fa-moon';
+                    this.innerHTML = '<i class="fas fa-moon"></i> 切换主题';
+                }
+            });
+
+            // 启动应用
+            initApp();
+        });
     </script>
-    <script src="script.js"></script>
 </body>
 
 </html>
